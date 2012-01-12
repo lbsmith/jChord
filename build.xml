@@ -1,0 +1,39 @@
+<project>
+    <path id="compile.classpath">
+       <fileset dir="./lib">
+         <include name="xmlrpc-1.1.jar"/>
+       </fileset>
+    </path>
+
+    <target name="clean">
+        <delete dir="build"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="build/classes"/>
+        <javac srcdir="src" destdir="build/classes">
+          <exclude name="**/peer/*.java"/>
+          <exclude name="**/*.peer.java"/>
+          <classpath refid="compile.classpath"/>
+        </javac>
+    </target>
+
+    <target name="jar">
+        <mkdir dir="build/jar"/>
+        <jar destfile="build/jar/JChordSimulator.jar" basedir="build/classes">
+            <manifest>
+                <attribute name="Main-Class" value="Simulator"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run">
+        <java classname="Simulator">
+          <classpath>
+            <path refid="compile.classpath"/>
+            <path location="build/jar/JChordSimulator.jar"/>
+          </classpath>
+        </java>
+    </target>
+
+</project>

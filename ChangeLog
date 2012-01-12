@@ -1,0 +1,110 @@
+7/11 ---
+  after several luckless days i finally scrapped the modifications i was doing to restructure
+    many things to allow for failures to go smoother, and it's a good thing i did.
+  i built onto the existing system and now recoveries from node failures go very smoothly
+  also made the threaded join mechanism the standard mechanism for the simulator, because 
+    i feel it gives a more realistic simulation rather than a one after the other approach
+  changed the output text messages some, and added a 'messages' command to see how many 
+    messages have gone through the system at any time
+ 
+7/5 ---
+  added basic successor list, still working out the bugs
+  node failures are now handled within remotenode, however this hasn't been tested very well
+
+7/4 ---
+  restructured the message transfer system in anticipation of converting it to use xml
+  when a node leaves it hands all its keys over to its successor now
+
+7/3 ---
+  did some code beautification, extracted the message listener thread into its own class
+    and moved all the stabilization code into the stabilizer class
+  need to do some cleaning of the fingertable class, lots of old useless code in there
+  had some ideas about an easy way to generate the xml code for the messages: follow an
+    approach similar to tcpip nested packets, in a serialized manner.  ie. requesting
+    a key to be represented in xml will request its key & value to be represented in 
+    xml and padded with whatever other information is needed.  this can be extrapolated
+    all the way to a generic XMLMessage class, which will be what is passed around in the
+    simulator, and will be decoded and objects recreated by the message listener.  
+  there's a strange bug that causes a node to be inserted in the wrong place sometimes, it
+    only occurs at the very top of the chord, which leads me to think it has something to do
+    with a range query returning an incorrect result.
+  things i still need to work on: 
+    the xml message system, node failure, replication of keys, successor lists, key lookups
+  added a log system where messages can easily be turned on and off
+  nodes created by the simulator now use random strings with random numbers rather than
+    foobar plus a random number for their identifier string fed into the sha1
+
+7/1 ---
+  added basic key transfer system
+  still need to add replication, the problem i have in mind is that the replication is
+    simple, however how do the nodes know those are replicated nodes and not try to transfer
+    them to their appropriate places during stabilization
+
+6/29 ---
+  each node join in the simulator now joins off of a randomly chosen node
+  starting work on handing node failures
+  just for fun i wrote a quick threaded version of the join method to see how the
+    system handles several concurrent joins, and it performed perfectly
+  need to add a key class, and addkey, getvalue and transferkey methods to localnode
+
+6/28 ---
+  leaving gracefully works now
+  added equals method to nodeidentity
+  need to modify random add function to piggyback on a random node, not always the initial node
+
+6/11 ---
+  working on revised join mechanism to allow simultaneous joins/leaves
+  will be adding stabilization thread
+
+5/31 ---
+  fixed array out of bounds exception, was being caused by the unsolicited listener getting to
+    the waiting message before the awaitresponse method, now when a node awaits a response it
+    temporarily stops the listener thread.
+  now the simulation reliably works, i've tested it repeatedly with a 10 node simulation
+  all successors/fingers are properly set, however the predecessors aren't correct all the time
+    i'll look into that.
+
+5/30 ---
+  spent last few days debugging and tweaking, now it appears to correctly construct
+    a chord layout, not incredibly fast, but its there.
+  one of the main bugs was caused during the initialization of the finger table of a 
+    joining node.  as the finger table was being initialized, the incomplete table was
+    being referenced, leading to random sporatic infinite loops caused by following 
+    for instance the successor to the joining node, which was the initial node, however
+    that node hadn't been updated to account for the joining node, so, at least for a 
+    system with only one node and one joining, it led to an infinite loop because the
+    successor to the initial node was itself.  worked around this by having the joining
+    node's finger table be created in a new finger table object, and only after its completely
+    constructed setting the actual node's finger table equal to the new table.
+  still have to figure out the random sporatic array out of bounds exceptions being thrown...
+    i suspect its a thread problem.  seems to be coming from notifyfingers
+
+5/27 ---
+  looking for bug that prevents findSuccessor to complete, seems to be a problem
+    with closestPrecedingFinger not returning the correct value.
+  seem to have fixed it, problem was if the range function was given a bound high < low
+    it would always return false, now I have it swapping them in that case, need to 
+    double check that.
+  well, it works for two nodes, when a third joins, findPredecessor doesn't work right
+
+5/25 ---
+  message passing, hacked to work with simulator
+  threads for nodes in simulator
+  listening loop for unsolicited messages
+  to simulate rpcs, when a message is sent which expects a response, it goes into 
+    a loop looking for new messages with the same message id.
+  responses are generated by swapping to/from, updating the data and keeping the
+    same message id
+
+5/24 ---
+  basic chord maintainance functionality in node class
+  outlined remotenode class and message transfer system 
+
+5/23 ---
+  basic functionality of finger table
+  
+5/22 ---
+  planned out class library and messaging format
+
+5/21 ---
+  sha1 algorithm and storing of node IDs 
